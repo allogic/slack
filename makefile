@@ -15,9 +15,6 @@ CFLAGS += -Wextra
 LFLAGS += -melf_x86_64
 LFLAGS += -nostdlib
 
-KERNEL_OBJS += $(patsubst kernel/%.s, kernel/%.o, $(wildcard kernel/*.s))
-KERNEL_OBJS += $(patsubst kernel/%.c, kernel/%.o, $(wildcard kernel/*.c))
-
 GDBFLAGS += --eval-command="set auto-load safe-path ."
 GDBFLAGS += --eval-command="set confirm off"
 GDBFLAGS += --eval-command="set listsize 30"
@@ -35,6 +32,9 @@ GDBFLAGS += --eval-command="break *0x7C00"
 GDBFLAGS += --eval-command="break *0x8000"
 GDBFLAGS += --eval-command="break *0x100000"
 GDBFLAGS += --eval-command="continue"
+
+KERNEL_OBJS += $(patsubst kernel/%.s, kernel/%.o, $(wildcard kernel/*.s))
+KERNEL_OBJS += $(patsubst kernel/%.c, kernel/%.o, $(wildcard kernel/*.c))
 
 kernel/%.o: kernel/%.s
 	nasm -f elf64 -g -F dwarf $< -o $@
