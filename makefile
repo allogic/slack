@@ -1,3 +1,6 @@
+# hexdump -C -n 32 kernel.bin
+# x/32xb 0x0
+
 CFLAGS += -m64
 CFLAGS += -mno-red-zone
 CFLAGS += -nostdlib
@@ -15,6 +18,7 @@ LFLAGS += -nostdlib
 KERNEL_OBJS += $(patsubst kernel/%.s, kernel/%.o, $(wildcard kernel/*.s))
 KERNEL_OBJS += $(patsubst kernel/%.c, kernel/%.o, $(wildcard kernel/*.c))
 
+GDBFLAGS += --eval-command="set auto-load safe-path ."
 GDBFLAGS += --eval-command="set confirm off"
 GDBFLAGS += --eval-command="set listsize 30"
 GDBFLAGS += --eval-command="set print pretty on"

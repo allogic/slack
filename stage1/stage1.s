@@ -2,9 +2,6 @@ bits 16
 
 start:
 
-	; BIOS gives boot drive in DL
-	mov [BOOT_DRIVE], dl
-
 	; Print message so we know bootloader executed
 	mov si, msg
 	call print_string
@@ -51,15 +48,13 @@ load_stage2:
 	mov dh, 0           ; Head
 	mov cl, 2           ; Sector
 
-	mov dl, [BOOT_DRIVE]
+	mov dl, 0x80        ; First hard drive
 
 	int 0x13            ; BIOS disk read
 
 	ret
 
 msg db "Booting slack...",0
-
-BOOT_DRIVE db 0
 
 ; Pad boot sector to 512 bytes
 times 510-($-$$) db 0
