@@ -70,8 +70,6 @@
 %define GDT64_DATA_PL0 \
 	SEG_ACCESS(1, 1, 0, SEG_DATA_RDWR), SEG_FLAGS(1, 1, 1)
 
-align 0x1000
-
 gdt_start:
 
 dq 0 ; Null descriptor
