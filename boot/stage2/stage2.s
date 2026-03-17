@@ -2,10 +2,15 @@ bits 16
 
 section .text
 
+global start
+
+extern get_memory_map
+
 start:
 
 	cli                       ; Disable interrupts
 	call enable_a20           ; Allow addressing above 1MB
+	call get_memory_map       ; Get memory map from BIOS
 	call load_kernel          ; Load kernel from disk
 	call setup_protected_mode ; Switch to protected mode
 
@@ -146,7 +151,7 @@ long_mode:
 	mov ss, ax
 
 	mov rdx, 0x100000 ; Kernel entry point at 1MB
-	jmp rdx           ; Enter kernel
+	call rdx          ; Enter kernel
 
 halt:
 	hlt

@@ -2,6 +2,8 @@ bits 16
 
 section .text
 
+global start
+
 start:
 
 	; Print message so we know bootloader executed

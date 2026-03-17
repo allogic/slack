@@ -7,7 +7,10 @@ L_FLAGS += -melf_x86_64
 L_FLAGS += -nostdlib
 L_FLAGS += -T linker.ld
 
-ASM_SRCS = $(wildcard *.s)
+ASM_SRCS += stage2.s # Must be first to be loaded at 0x8000
+ASM_SRCS += gdt.s
+ASM_SRCS += ptbl.s
+ASM_SRCS += mmap.s
 
 OBJS = $(ASM_SRCS:.s=.o)
 

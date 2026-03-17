@@ -1,4 +1,4 @@
-void kernel_main() {
+void main() {
   while (1)
     ;
 }

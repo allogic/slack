@@ -20,8 +20,9 @@ L_FLAGS += -melf_x86_64
 L_FLAGS += -nostdlib
 L_FLAGS += -T linker.ld
 
-ASM_SRCS = $(wildcard *.s)
-C_SRCS = $(wildcard *.c)
+ASM_SRCS += kernel.s # Must be first to be loaded at 0x100000
+
+C_SRCS += main.c
 
 OBJS = $(ASM_SRCS:.s=.o) $(C_SRCS:.c=.o)
 

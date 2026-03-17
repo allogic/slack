@@ -1,10 +1,14 @@
-global kernel_entry
-
-extern kernel_main
+bits 64
 
 section .text
 
-kernel_entry:
+global start
+
+extern main
+
+start:
+
+	call main ; Call the main function in the kernel
 
 halt:
 	hlt

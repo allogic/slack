@@ -1,3 +1,5 @@
+ENTRY(start)
+
 SECTIONS
 {
 	. = 0x7C00;
