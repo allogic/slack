@@ -1,3 +1,5 @@
+bits 32
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Page Tables
 ;;;   Sets up a 4 lvl page table with 4 KiB pages, identity-mapped.
@@ -77,6 +79,10 @@
 %endmacro
 
 ; TODO: remove this static page table setup and support dynamic allocation of page tables in the future
+
+section .rodata
+
+global pml4t
 
 align 0x1000
 pml4t:

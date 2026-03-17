@@ -1,5 +1,7 @@
 bits 16
 
+section .text
+
 start:
 
 	; Print message so we know bootloader executed
@@ -14,6 +16,8 @@ start:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Print string using BIOS interrupt
+;;;   Expects SI to point to a null-terminated string.
+;;;   Uses BIOS interrupt 10h, function 0Eh (teletype output).
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 print_string:
@@ -33,7 +37,9 @@ done:
 	ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Load sectors from disk
+;;; Load stage2 bootloader into memory
+;;;   Reads sectors from disk into RAM where the loader will live.
+;;;   Uses BIOS interrupt 13h.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 load_stage2:
@@ -41,7 +47,7 @@ load_stage2:
 	mov bx, 0x8000      ; Load stage2 at
 
 	mov ah, 0x02        ; BIOS disk read function
-	mov al, 32          ; Number of sectors to read
+	mov al, 128         ; Number of sectors to read
 
 	mov ch, 0           ; Cylinder
 	mov dh, 0           ; Head
@@ -53,10 +59,6 @@ load_stage2:
 
 	ret
 
+section .rodata
+
 msg db "Booting slack...",0
-
-; Pad boot sector to 512 bytes
-times 510-($-$$) db 0
-
-; Boot signature required by BIOS
-dw 0xAA55

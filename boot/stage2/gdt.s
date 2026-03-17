@@ -1,3 +1,5 @@
+bits 16
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Global Descriptor Table
 ;;;   Defines memory segments for protected and long mode.
@@ -70,21 +72,18 @@
 %define GDT64_DATA_PL0 \
 	SEG_ACCESS(1, 1, 0, SEG_DATA_RDWR), SEG_FLAGS(1, 1, 1)
 
+section .rodata
+
+global gdt_descriptor
+
 gdt_start:
 
 dq 0 ; Null descriptor
 
-gdt32_code: ; 0x08 = offset of this descriptor in GDT
-GDT_ENTRY 0, 0xFFFFF, GDT32_CODE_PL0
-
-gdt64_code: ; 0x10 = offset of this descriptor in GDT
-GDT_ENTRY 0, 0xFFFFF, GDT64_CODE_PL0
-
-gdt32_data: ; 0x18 = offset of this descriptor in GDT
-GDT_ENTRY 0, 0xFFFFF, GDT32_DATA_PL0
-
-gdt64_data: ; 0x20 = offset of this descriptor in GDT
-GDT_ENTRY 0, 0xFFFFF, GDT64_DATA_PL0
+GDT_ENTRY 0, 0xFFFFF, GDT32_CODE_PL0 ; 0x08 = offset of this descriptor in GDT
+GDT_ENTRY 0, 0xFFFFF, GDT64_CODE_PL0 ; 0x10 = offset of this descriptor in GDT
+GDT_ENTRY 0, 0xFFFFF, GDT32_DATA_PL0 ; 0x18 = offset of this descriptor in GDT
+GDT_ENTRY 0, 0xFFFFF, GDT64_DATA_PL0 ; 0x20 = offset of this descriptor in GDT
 
 gdt_end:
 

@@ -1,6 +1,6 @@
 SECTIONS
 {
-	. = 0x7C00;
+	. = 0x8000;
 
 	.text :
 	{
@@ -20,6 +20,12 @@ SECTIONS
 	.bss :
 	{
 		*(.bss*)
-		*(COMMON)
+	}
+
+	. = 0x8000 + 0x10000 - 0x2;
+
+	.boot_sig :
+	{
+		SHORT(0xDEAD)
 	}
 }

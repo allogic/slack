@@ -1,5 +1,7 @@
 bits 16
 
+section .text
+
 start:
 
 	cli                       ; Disable interrupts
@@ -9,8 +11,6 @@ start:
 
 hang_real_mode:
 	jmp hang_real_mode
-
-%include "gdt.s"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Enable A20 line
@@ -40,14 +40,15 @@ load_kernel:
 	mov ax, 0x1000
 	mov es, ax
 
-	mov bx, 0     ; Destination = 0x1000:0000 = 0x10000
+	; Destination = 0x1000:0000 = 0x10000
+	mov bx, 0
 
 	mov ah, 0x02  ; BIOS disk read function
-	mov al, 100   ; Number of sectors to read
+	mov al, 128   ; Number of sectors to read
 
 	mov ch, 0     ; Cylinder
 	mov dh, 0     ; Head
-	mov cl, 34    ; Sector
+	mov cl, 130   ; Sector
 
 	mov dl, 0x80  ; First hard drive
 
@@ -59,6 +60,8 @@ load_kernel:
 ;;; Switch to protected mode
 ;;;   Switch CPU from 16-bit real mode → 32-bit protected mode.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+extern gdt_descriptor
 
 setup_protected_mode:
 
@@ -100,6 +103,8 @@ hang_protected_mode:
 ;;; Setup paging for long mode and switch to long mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+extern pml4t
+
 setup_long_mode:
 
 	; Load address of PML4
@@ -124,12 +129,6 @@ setup_long_mode:
 
 	; This reloads CS and fully enters long mode
 	jmp 0x10:long_mode
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Page Tables (Identity Map)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-%include "ptbl.s"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 64-bit Long Mode
