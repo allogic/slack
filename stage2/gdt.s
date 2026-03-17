@@ -1,31 +1,21 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Global Descriptor Table
 ;;;   Defines memory segments for protected and long mode.
-;;;   https://wiki.osdev.org/GDT_Tutorial
 ;;;   https://wiki.osdev.org/Global_Descriptor_Table
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Descriptor type (0 for system, 1 for code/data)
-%define SEG_DESCTYPE(x) ((x) << 4)
-
-; Present
-%define SEG_PRES(x) ((x) << 7)
-
-; Privilege level
-%define SEG_PRIV(x) (((x) & 3) << 5)
-
-; Accessed / RW / Executable bits
-%define SEG_TYPE(x) ((x) & 0x0F)
-
-; Flags
-%define SEG_SAVL(x) ((x) << 12)
-%define SEG_LONG(x) ((x) << 13)
-%define SEG_SIZE(x) ((x) << 14)
-%define SEG_GRAN(x) ((x) << 15)
+%define SEG_DESC(x) ( (x)         << 0x04) ; Descriptor type (0 for system, 1 for code/data)
+%define SEG_PRIV(x) (((x) & 0x03) << 0x05) ; Privilege level (0 - 3)
+%define SEG_PRES(x) ( (x)         << 0x07) ; Present
+%define SEG_SAVL(x) ( (x)         << 0x0C) ; Available for system use
+%define SEG_LONG(x) ( (x)         << 0x0D) ; Long mode
+%define SEG_SIZE(x) ( (x)         << 0x0E) ; Size (0 for 16-bit, 1 for 32)
+%define SEG_GRAN(x) ( (x)         << 0x0F) ; Granularity (0 for 1B - 1MB, 1 for 4KB - 4GB)
+%define SEG_TYPE(x) ( (x) & 0x0F         ) ; Accessed / RW / Executable bits
 
 ; Access builder
-%define SEG_ACCESS(type, dpl) \
-	( SEG_PRES(1) | SEG_DESCTYPE(1) | SEG_PRIV(dpl) | SEG_TYPE(type) )
+%define SEG_ACCESS(pres, desc, dpl, type) \
+	( SEG_PRES(pres) | SEG_DESC(desc) | SEG_PRIV(dpl) | SEG_TYPE(type) )
 
 ; Flags builder
 %define SEG_FLAGS(gran, size, long) \
@@ -39,11 +29,11 @@
 	; %4 = Flags
 
 	dw (%2 & 0xFFFF)                            ; Limit         15:00
-	dw (%1 & 0xFFFF)                            ; Base          16:31
-	db ((%1 >> 16) & 0xFF)                      ; Base          32:39
-	db %3                                       ; Access        40:47
-	db ((%2 >> 16) & 0x0F) | ((%4 & 0x0F) << 4) ; Limit + Flags 48:55
-	db ((%1 >> 24) & 0xFF)                      ; Base          56:63
+	dw (%1 & 0xFFFF)                            ; Base          31:16
+	db ((%1 >> 16) & 0xFF)                      ; Base          39:32
+	db %3                                       ; Access        47:40
+	db ((%2 >> 16) & 0x0F) | ((%4 & 0x0F) << 4) ; Limit + Flags 55:48
+	db ((%1 >> 24) & 0xFF)                      ; Base          63:56
 %endmacro
 
 ; Common segment types
@@ -66,19 +56,21 @@
 
 ; Code segment descriptor for ring 0 protected mode
 %define GDT32_CODE_PL0 \
-	SEG_ACCESS(SEG_CODE_EXRD, 0), SEG_FLAGS(1,1,0)
+	SEG_ACCESS(1, 1, 0, SEG_CODE_EXRD), SEG_FLAGS(1, 1, 0)
 
 ; Code segment descriptor for ring 0 long mode
 %define GDT64_CODE_PL0 \
-	SEG_ACCESS(SEG_CODE_EXRD, 0), SEG_FLAGS(1,1,1)
+	SEG_ACCESS(1, 1, 0, SEG_CODE_EXRD), SEG_FLAGS(1, 1, 1)
 
 ; Data segment descriptor for ring 0 protected mode
 %define GDT32_DATA_PL0 \
-	SEG_ACCESS(SEG_DATA_RDWR, 0), SEG_FLAGS(1,1,0)
+	SEG_ACCESS(1, 1, 0, SEG_DATA_RDWR), SEG_FLAGS(1, 1, 0)
 
 ; Data segment descriptor for ring 0 long mode
 %define GDT64_DATA_PL0 \
-	SEG_ACCESS(SEG_DATA_RDWR, 0), SEG_FLAGS(1,1,1)
+	SEG_ACCESS(1, 1, 0, SEG_DATA_RDWR), SEG_FLAGS(1, 1, 1)
+
+align 0x1000
 
 gdt_start:
 

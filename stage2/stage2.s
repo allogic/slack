@@ -103,8 +103,8 @@ hang_protected_mode:
 setup_long_mode:
 
 	; Load address of PML4
-	mov eax, pml4 ; PML4 is the top-level page table
-	mov cr3, eax  ; CR3 = base of paging structures
+	mov eax, pml4t ; PML4 is the top-level page table
+	mov cr3, eax   ; CR3 = base of paging structures
 
 	; Enable PAE (Physical Address Extension)
 	mov eax, cr4
@@ -129,36 +129,7 @@ setup_long_mode:
 ;;; Page Tables (Identity Map)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-align 0x1000
-
-pml4:
-
-; PML4 entry = PDPT
-; +3 sets:
-;   present
-;   writable
-dq pdpt + 3
-
-align 0x1000
-
-pdpt:
-
-; PDPT entry = PD
-; +3 sets:
-;   present
-;   writable
-dq pd + 3
-
-align 0x1000
-
-pd:
-
-; 2MB identity-mapped page
-;
-; present
-; writable
-; page size = 2MB
-dq 0x00000000 | 0x83
+%include "ptbl.s"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 64-bit Long Mode
