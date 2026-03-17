@@ -45,12 +45,12 @@ kernel/%.o: kernel/%.c
 all: stage1 stage2 kernel disk
 
 stage1:
-	nasm stage1/stage1.s -f elf64 -g -F dwarf -o stage1/stage1.o
+	nasm stage1/stage1.s -istage1 -f elf64 -g -F dwarf -o stage1/stage1.o
 	ld $(LFLAGS) -T stage1/linker.ld -Map=stage1/stage1.map stage1/stage1.o -o stage1/stage1.elf
 	objcopy -O binary stage1/stage1.elf stage1/stage1.bin
 
 stage2:
-	nasm stage2/stage2.s -f elf64 -g -F dwarf -o stage2/stage2.o
+	nasm stage2/stage2.s -istage2 -f elf64 -g -F dwarf -o stage2/stage2.o
 	ld $(LFLAGS) -T stage2/linker.ld -Map=stage2/stage2.map stage2/stage2.o -o stage2/stage2.elf
 	objcopy -O binary stage2/stage2.elf stage2/stage2.bin
 

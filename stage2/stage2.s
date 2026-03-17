@@ -7,15 +7,17 @@ start:
 	call load_kernel          ; Load kernel from disk
 	call setup_protected_mode ; Switch to protected mode
 
-hang1:
-	jmp hang1
+hang_real_mode:
+	jmp hang_real_mode
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Enable A20 line
-;   The A20 line allows addressing above 1MB.
-;   Without enabling A20 the address bus wraps at 1MB,
-;   causing memory corruption.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+%include "gdt.s"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Enable A20 line
+;;;   The A20 line allows addressing above 1MB.
+;;;   Without enabling A20 the address bus wraps at 1MB,
+;;;   causing memory corruption.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 enable_a20:
 
@@ -25,11 +27,11 @@ enable_a20:
 
 	ret
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Load kernel into memory
-;   Reads sectors from disk into RAM where the kernel will live.
-;   Uses BIOS interrupt 13h.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Load kernel into memory
+;;;   Reads sectors from disk into RAM where the kernel will live.
+;;;   Uses BIOS interrupt 13h.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 load_kernel:
 
@@ -53,49 +55,10 @@ load_kernel:
 
 	ret
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Global Descriptor Table
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-gdt_start:
-
-dq 0 ; Null descriptor
-
-gdt_code:
-
-; Code segment descriptor
-;
-; Base = 0
-; Limit = 4GB
-; Flags:
-;   Present
-;   Ring 0
-;   Executable
-;   Readable
-;   32-bit
-;   Granularity = 4KB
-dq 0x00AF9A000000FFFF
-
-gdt_data:
-
-; Data segment descriptor
-;
-; Base = 0
-; Limit = 4GB
-; Read/Write
-dq 0x00AF92000000FFFF
-
-gdt_end:
-
-gdt_descriptor:
-
-dw gdt_end - gdt_start - 1 ; Size of GDT minus 1 (required by lgdt)
-dd gdt_start               ; Linear address of GDT
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Switch to protected mode
-;   Switch CPU from 16-bit real mode → 32-bit protected mode.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Switch to protected mode
+;;;   Switch CPU from 16-bit real mode → 32-bit protected mode.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 setup_protected_mode:
 
@@ -106,22 +69,19 @@ setup_protected_mode:
 	or eax, 1
 	mov cr0, eax
 
-	; Far jump:
-	;   selector = 0x08 (GDT code segment)
-	;   offset = protected_mode
 	; This reloads CS and fully enters protected mode
 	jmp 0x08:protected_mode
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; 32-bit protected mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 32-bit Protected Mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 bits 32
 
 protected_mode:
 
-	; 0x10 = data segment selector in GDT
-	mov ax, 0x10
+	; Data segment selector in GDT
+	mov ax, 0x18
 
 	; Set data segments
 	mov ds, ax
@@ -133,12 +93,12 @@ protected_mode:
 	; Prepare paging and enable long mode
 	call setup_long_mode
 
-hang2:
-	jmp hang2
+hang_protected_mode:
+	jmp hang_protected_mode
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Setup paging for long mode and switch to long mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Setup paging for long mode and switch to long mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 setup_long_mode:
 
@@ -162,15 +122,12 @@ setup_long_mode:
 	or eax, (1 << 31)
 	mov cr0, eax
 
-	; Far jump:
-	;   selector = 0x08 (GDT code segment)
-	;   offset = long_mode
 	; This reloads CS and fully enters long mode
-	jmp 0x08:long_mode
+	jmp 0x10:long_mode
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Page tables (identity map)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Page Tables (Identity Map)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 align 0x1000
 
@@ -203,16 +160,16 @@ pd:
 ; page size = 2MB
 dq 0x00000000 | 0x83
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; 64-bit long mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 64-bit Long Mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 bits 64
 
 long_mode:
 
-	; 0x10 = data segment selector in GDT
-	mov ax, 0x10
+	; Data segment selector in GDT
+	mov ax, 0x20
 
 	; Set data segments
 	mov ds, ax
