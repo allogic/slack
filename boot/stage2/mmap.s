@@ -8,20 +8,21 @@ bits 16
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; E820 memory map entry structure (24 bytes)
-; struc e820_entry
-; 	.base_low  resd 1 ; Base address of the memory region (lower 32 bits)
-; 	.base_high resd 1 ; Base address of the memory region (upper 32 bits)
-; 	.len_low   resd 1 ; Length of the memory region in bytes (lower 32 bits)
-; 	.len_high  resd 1 ; Length of the memory region in bytes (upper 32 bits)
-; 	.type      resd 1 ; Type of memory region (1 = usable, other values indicate reserved or special regions)
-; 	.acpi      resd 1 ; ACPI extended attributes
-; endstruc
+struc e820_entry
+	.base_low  resd 1 ; Base address of the memory region (lower 32 bits)
+	.base_high resd 1 ; Base address of the memory region (upper 32 bits)
+	.len_low   resd 1 ; Length of the memory region in bytes (lower 32 bits)
+	.len_high  resd 1 ; Length of the memory region in bytes (upper 32 bits)
+	.type      resd 1 ; Type of memory region (1 = usable, other values indicate reserved or special regions)
+	.acpi      resd 1 ; ACPI extended attributes
+endstruc
 
 section .text
 
 global get_memory_map
 
 get_memory_map:
+
 	xor ebx, ebx                 ; Continuation value = 0
 
 	mov ax, 0x1800               ; Buffer for memory map entries
@@ -32,6 +33,7 @@ get_memory_map:
 	mov di, 0x0008               ; Entries start at 0x18008
 
 .next_entry:
+
 	mov eax, 0xE820              ; E820h - Get Memory Map
 	mov edx, 0x534D4150          ; 'SMAP'
 	mov ecx, 24                  ; Size of buffer
@@ -49,4 +51,5 @@ get_memory_map:
 	jne .next_entry              ; Continue if EBX != 0
 
 .done:
+
 	ret

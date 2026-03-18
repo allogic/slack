@@ -57,19 +57,19 @@ bits 16
 %define SEG_CODE_EXRDCA    0x0F ; Execute/Read, conforming, accessed
 
 ; Code segment descriptor for ring 0 protected mode
-%define GDT32_CODE_PL0 \
+%define GDT_PM_CODE_PL0 \
 	SEG_ACCESS(1, 1, 0, SEG_CODE_EXRD), SEG_FLAGS(1, 1, 0)
 
 ; Code segment descriptor for ring 0 long mode
-%define GDT64_CODE_PL0 \
+%define GDT_LM_CODE_PL0 \
 	SEG_ACCESS(1, 1, 0, SEG_CODE_EXRD), SEG_FLAGS(1, 1, 1)
 
 ; Data segment descriptor for ring 0 protected mode
-%define GDT32_DATA_PL0 \
+%define GDT_PM_DATA_PL0 \
 	SEG_ACCESS(1, 1, 0, SEG_DATA_RDWR), SEG_FLAGS(1, 1, 0)
 
 ; Data segment descriptor for ring 0 long mode
-%define GDT64_DATA_PL0 \
+%define GDT_LM_DATA_PL0 \
 	SEG_ACCESS(1, 1, 0, SEG_DATA_RDWR), SEG_FLAGS(1, 1, 1)
 
 section .rodata
@@ -80,14 +80,14 @@ gdt_start:
 
 dq 0 ; Null descriptor
 
-GDT_ENTRY 0, 0xFFFFF, GDT32_CODE_PL0 ; 0x08 = offset of this descriptor in GDT
-GDT_ENTRY 0, 0xFFFFF, GDT64_CODE_PL0 ; 0x10 = offset of this descriptor in GDT
-GDT_ENTRY 0, 0xFFFFF, GDT32_DATA_PL0 ; 0x18 = offset of this descriptor in GDT
-GDT_ENTRY 0, 0xFFFFF, GDT64_DATA_PL0 ; 0x20 = offset of this descriptor in GDT
+GDT_ENTRY 0, 0xFFFFF, GDT_PM_CODE_PL0 ; 0x08 = offset of this descriptor in GDT
+GDT_ENTRY 0, 0xFFFFF, GDT_LM_CODE_PL0 ; 0x10 = offset of this descriptor in GDT
+GDT_ENTRY 0, 0xFFFFF, GDT_PM_DATA_PL0 ; 0x18 = offset of this descriptor in GDT
+GDT_ENTRY 0, 0xFFFFF, GDT_LM_DATA_PL0 ; 0x20 = offset of this descriptor in GDT
 
 gdt_end:
 
 gdt_descriptor:
 
 dw gdt_end - gdt_start - 1 ; Size of GDT minus 1 (required by lgdt)
-dd gdt_start               ; Linear address of GDT
+dd gdt_start               ; Base address of GDT

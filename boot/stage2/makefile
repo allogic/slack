@@ -7,8 +7,12 @@ L_FLAGS += -melf_x86_64
 L_FLAGS += -nostdlib
 L_FLAGS += -T linker.ld
 
-ASM_SRCS += stage2.s # Must be first to be loaded at 0x8000
+ASM_SRCS += stage2rm.s # Must be first to be loaded at 0x8000
+ASM_SRCS += stage2pm.s
+ASM_SRCS += stage2lm.s
 ASM_SRCS += gdt.s
+ASM_SRCS += idtpm.s
+ASM_SRCS += idtlm.s
 ASM_SRCS += ptbl.s
 ASM_SRCS += mmap.s
 

@@ -1,5 +1,10 @@
 bits 16
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Stage 1 Bootloader - Real Mode
+;;;   This is the first stage of the bootloader, loaded by the BIOS.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 section .text
 
 global start
@@ -28,14 +33,15 @@ print_string:
 
 	lodsb           ; Load byte from [SI] → AL
 	or al, al       ; Check if zero terminator
-	jz done
+	jz .done
 
 	mov ah, 0x0E    ; BIOS teletype output
 	int 0x10
 
 	jmp .next_char
 
-done:
+.done:
+
 	ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

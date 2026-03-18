@@ -7,7 +7,7 @@ L_FLAGS += -melf_x86_64
 L_FLAGS += -nostdlib
 L_FLAGS += -T linker.ld
 
-ASM_SRCS += stage1.s # Must be first to be loaded at 0x7C00
+ASM_SRCS += stage1rm.s # Must be first to be loaded at 0x7C00
 
 OBJS = $(ASM_SRCS:.s=.o)
 
