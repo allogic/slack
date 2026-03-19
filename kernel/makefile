@@ -5,6 +5,8 @@ ASM_FLAGS += -g
 
 C_FLAGS += -I.
 C_FLAGS += -c
+C_FLAGS += -g
+C_FLAGS += -O0
 C_FLAGS += -m64
 C_FLAGS += -mno-red-zone
 C_FLAGS += -nostdlib

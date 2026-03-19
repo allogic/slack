@@ -1,13 +1,13 @@
 bits 16
 
+global start
+
+section .text
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Stage 1 Bootloader - Real Mode
 ;;;   This is the first stage of the bootloader, loaded by the BIOS.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-section .text
-
-global start
 
 start:
 

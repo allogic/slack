@@ -1,5 +1,9 @@
 bits 16
 
+global gdt_descriptor
+
+section .data
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Global Descriptor Table
 ;;;   Defines memory segments for protected and long mode.
@@ -71,10 +75,6 @@ bits 16
 ; Data segment descriptor for ring 0 long mode
 %define GDT_LM_DATA_PL0 \
 	SEG_ACCESS(1, 1, 0, SEG_DATA_RDWR), SEG_FLAGS(1, 1, 1)
-
-section .rodata
-
-global gdt_descriptor
 
 gdt_start:
 

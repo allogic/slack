@@ -1,5 +1,9 @@
 bits 16
 
+global get_mmap
+
+section .text
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Memory Map
 ;;;   Defines the structure for E820 memory map entries and a function
@@ -17,39 +21,35 @@ struc e820_entry
 	.acpi      resd 1 ; ACPI extended attributes
 endstruc
 
-section .text
+get_mmap:
 
-global get_memory_map
+	xor ebx, ebx            ; Continuation value = 0
 
-get_memory_map:
-
-	xor ebx, ebx                 ; Continuation value = 0
-
-	mov ax, 0x1800               ; Buffer for memory map entries
+	mov ax, 0x1800          ; Buffer for memory map entries
 	mov es, ax
 	mov ds, ax
 
-	mov dword [0x0000], 0        ; Clear count of entries at 0x18000
-	mov di, 0x0008               ; Entries start at 0x18008
+	mov dword [0x0000], 0   ; Clear count of entries at 0x18000
+	mov di, 0x0008          ; Entries start at 0x18008
 
-.next_entry:
+get_mmap_next_entry:
 
-	mov eax, 0xE820              ; E820h - Get Memory Map
-	mov edx, 0x534D4150          ; 'SMAP'
-	mov ecx, 24                  ; Size of buffer
+	mov eax, 0xE820         ; E820h - Get Memory Map
+	mov edx, 0x534D4150     ; 'SMAP'
+	mov ecx, 24             ; Size of buffer
 	int 0x15
 
-	jc .done                     ; Carry = error/end
+	jc get_mmap_done        ; Carry = error/end
 
-	cmp eax, 0x534D4150          ; 'SMAP'
-	jne .done                    ; Invalid response
+	cmp eax, 0x534D4150     ; 'SMAP'
+	jne get_mmap_done       ; Invalid response
 
-	add di, 24                   ; Next slot
-	inc dword [0x0000]           ; Increment count of entries
+	add di, 24              ; Next slot
+	inc dword [0x0000]      ; Increment count of entries
 
 	test ebx, ebx
-	jne .next_entry              ; Continue if EBX != 0
+	jne get_mmap_next_entry ; Continue if EBX != 0
 
-.done:
+get_mmap_done:
 
 	ret

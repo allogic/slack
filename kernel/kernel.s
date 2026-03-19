@@ -1,52 +1,63 @@
 bits 64
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Kernel Entry Point
-;;;   This is the entry point for the kernel after the bootloader has loaded it into memory.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-section .text
-
 global start
 global print_string
 
 extern main
 
+section .text
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Kernel Entry Point
+;;;   This is the entry point for the kernel after the bootloader
+;;;   has loaded it into memory.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 start:
 
 	call main ; Call the main function in the kernel
 
-halt:
-	hlt
-	jmp halt
+	hlt       ; Properly reboot the machine at this point
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; We should never reach this!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; void print_string(char const* str)
-; rdi = pointer to string
+hang_kernel:
+
+	jmp hang_kernel
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Simple print string function (Debug purpose only)
+;;;   rdi = pointer to string
+;;;   void print_string(char const* str)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 print_string:
 
-    push rsi
-    push rdi
+	push rsi
+	push rdi
 
-    mov rsi, rdi              ; Source string
-    mov rdi, VIDEO_MEMORY     ; Destination (VGA)
+	mov rsi, rdi                ; Source string
+	mov rdi, 0xB8000       ; Destination (VGA)
 
-.next_char:
+print_string_next_char:
 
-    lodsb                     ; AL = *RSI++
-    test al, al
-    jz .done
+	lodsb                       ; AL = *RSI++
+	test al, al
+	jz print_string_done
 
-    mov ah, WHITE_ON_BLACK
-    stosw                     ; write AX to [RDI], RDI += 2
+	mov ah, 0x07
+	stosw                       ; write AX to [RDI], RDI += 2
 
-    jmp .next_char
+	jmp print_string_next_char
 
-.done:
+print_string_done:
 
-    pop rdi
-    pop rsi
-    ret
+	pop rdi
+	pop rsi
+
+	ret
 
 section .bss
 

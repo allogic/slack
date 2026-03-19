@@ -1,25 +1,31 @@
 bits 16
 
+global start
+
+extern get_mmap
+extern gdt_descriptor
+extern protected_mode
+
+section .text
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Stage 2 Bootloader - Real Mode
 ;;;   This is the second stage of the bootloader, loaded by the first stage.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section .text
-
-global start
-
-extern get_memory_map
-extern gdt_descriptor
-extern protected_mode
-
 start:
 
-	cli                       ; Disable interrupts
+	; Disable interrupts
+	cli
+
 	call enable_a20           ; Allow addressing above 1MB
-	; call get_memory_map       ; Get memory map from BIOS
+	; call get_mmap             ; Get memory map from BIOS
 	call load_kernel          ; Load kernel from disk
 	call setup_protected_mode ; Switch to protected mode
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; We should never reach this!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 hang_real_mode:
 

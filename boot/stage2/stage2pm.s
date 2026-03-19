@@ -1,35 +1,38 @@
 bits 32
 
+global protected_mode
+
+extern pml4t
+extern long_mode
+
+section .text
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Stage 2 Bootloader - Protected Mode
 ;;;   This is the second stage of the bootloader, loaded by the first stage.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section .text
-
-global protected_mode
-
-extern pml4t
-extern idt_pm_descriptor
-extern long_mode
-
 protected_mode:
 
-	; Data segment selector in GDT
+	; Data segment selector
 	mov ax, 0x18
 
 	; Set data segments
-	mov ds, ax
+	mov es, ax
 	mov ss, ax
-
-	; Load the IDT into IDTR register
-	lidt [idt_pm_descriptor]
+	mov ds, ax
+	mov fs, ax
+	mov gs, ax
 
 	; Setup stack pointer
 	mov esp, 0x90000
 
 	; Prepare paging and enable long mode
 	call setup_long_mode
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; We should never reach this!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 hang_protected_mode:
 
